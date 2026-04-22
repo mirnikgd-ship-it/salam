@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:6.0
+    container_name: mongo_db
+    restart: always
+    environment:
+      - MONGO_INITDB_DATABASE=fastapi_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build: .
+    container_name: fastapi_app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_URL=mongodb://db:27017
+    depends_on:
+      - db
+
+volumes:
+  mongo_data:

@@ -1,0 +1,15 @@
+curl --location 'http://localhost:8080/items' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name":"qwe",
+    "price":48.99
+}'
+
+
+curl -X POST "http://localhost:8080/items/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Ноутбук",
+    "price": 999.99,
+    "description": "Игровой ноутбук с RTX 4060"
+  }'
