@@ -9,14 +9,14 @@ from bson import ObjectId
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://db:27017")
 DB_NAME = "fastapi_db"
-COLLECTION_NAME = "items"
+COLLECTION_NAME = "humans"
 
-class Item(BaseModel):
+class Human(BaseModel):
     name: str
     price: float
     description: Optional[str] = None
 
-class ItemResponse(Item):
+class HumanResponse(Human):
     id: str
 
 MILK_COLLECTION = "milk"
@@ -48,101 +48,101 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-@app.post("/items/create", response_model=ItemResponse)
-async def create_item(item: Item):
+@app.post("/humans/create", response_model=HumanResponse)
+async def create_human(human: Human):
     collection = db[COLLECTION_NAME]
-    result = await collection.insert_one(item.model_dump())
-    created_item = await collection.find_one({"_id": result.inserted_id})
-    created_item["id"] = str(created_item.pop("_id"))
-    return created_item
+    result = await collection.insert_one(human.model_dump())
+    created_human = await collection.find_one({"_id": result.inserted_id})
+    created_human["id"] = str(created_human.pop("_id"))
+    return created_human
 
-@app.get("/items/", response_model=List[ItemResponse])
-async def read_items():
+@app.get("/humans/", response_model=List[HumanResponse])
+async def read_humans():
     collection = db[COLLECTION_NAME]
-    items = []
-    async for item in collection.find():
-        item["id"] = str(item.pop("_id"))
-        items.append(item)
-    return items
+    humans = []
+    async for human in collection.find():
+        humans["id"] = str(human.pop("_id"))
+        humans.append(human)
+    return humans
 
-@app.put("/items/{item_id}", response_model=ItemResponse)
-async def update_item(item_id: str, item: Item):
+@app.put("/humans/{human_id}", response_model=HumanResponse)
+async def update_human(human_id: str, human: Human):
     try:
-        obj_id = ObjectId(item_id)
+        obj_id = ObjectId(human_id)
     except:
-        raise HTTPException(status_code=400, detail="Invalid item ID format")
+        raise HTTPException(status_code=400, detail="Invalid human ID format")
     
     collection = db[COLLECTION_NAME]
     existing = await collection.find_one({"_id": obj_id})
     if not existing:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Human not found")
     
     await collection.update_one(
         {"_id": obj_id},
-        {"$set": item.model_dump()}
+        {"$set": human.model_dump()}
     )
     
     updated = await collection.find_one({"_id": obj_id})
     updated["id"] = str(updated.pop("_id"))
     return updated
 
-@app.delete("/items/{item_id}", response_model=ItemResponse)
-async def delete_item(item_id: str = Path(..., description="MongoDB ObjectId")):
+@app.delete("/humans/{human_id}", response_model=HumanResponse)
+async def delete_human(human_id: str = Path(..., description="MongoDB ObjectId")):
     collection = db[COLLECTION_NAME]
     
-    result = await collection.delete_one({"_id": ObjectId(item_id)})
+    result = await collection.delete_one({"_id": ObjectId(human_id)})
     
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return ItemResponse(id=item_id, name="", price=0.0)
+        raise HTTPException(status_code=404, detail="Human not found")
+    return HumanResponse(id=human_id, name="", price=0.0)
 
 @app.post("/milk/create", response_model=MilkResponse)
-async def create_milk(item: Milk):
+async def create_milk(human: Milk):
     collection = db[MILK_COLLECTION]
-    result = await collection.insert_one(item.model_dump())
-    created_item = await collection.find_one({"_id": result.inserted_id})
-    created_item["id"] = str(created_item.pop("_id"))
-    return created_item
-#И так далее везде Item. items и т.д. меняем на milk
-@app.get("/items/", response_model=List[ItemResponse])
-async def read_items():
-    collection = db[COLLECTION_NAME]
-    items = []
-    async for item in collection.find():
-        item["id"] = str(item.pop("_id"))
-        items.append(item)
-    return items
+    result = await collection.insert_one(human.model_dump())
+    created_human = await collection.find_one({"_id": result.inserted_id})
+    created_human["id"] = str(created_human.pop("_id"))
+    return created_human
 
-@app.put("/items/{item_id}", response_model=ItemResponse)
-async def update_item(item_id: str, item: Item):
+@app.get("/humans/", response_model=List[HumanResponse])
+async def read_humans():
+    collection = db[COLLECTION_NAME]
+    humans = []
+    async for human in collection.find():
+        human["id"] = str(human.pop("_id"))
+        humans.append(human)
+    return humans
+
+@app.put("/humans/{human_id}", response_model=HumanResponse)
+async def update_human(human_id: str, human: Human):
     try:
-        obj_id = ObjectId(item_id)
+        obj_id = ObjectId(human_id)
     except:
-        raise HTTPException(status_code=400, detail="Invalid item ID format")
+        raise HTTPException(status_code=400, detail="Invalid human ID format")
     
     collection = db[COLLECTION_NAME]
     existing = await collection.find_one({"_id": obj_id})
     if not existing:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Human not found")
     
     await collection.update_one(
         {"_id": obj_id},
-        {"$set": item.model_dump()}
+        {"$set": human.model_dump()}
     )
     
     updated = await collection.find_one({"_id": obj_id})
     updated["id"] = str(updated.pop("_id"))
     return updated
 
-@app.delete("/items/{item_id}", response_model=ItemResponse)
-async def delete_item(item_id: str = Path(..., description="MongoDB ObjectId")):
+@app.delete("/humans/{human_id}", response_model=HumanResponse)
+async def delete_human(human_id: str = Path(..., description="MongoDB ObjectId")):
     collection = db[COLLECTION_NAME]
     
-    result = await collection.delete_one({"_id": ObjectId(item_id)})
+    result = await collection.delete_one({"_id": ObjectId(human_id)})
     
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return ItemResponse(id=item_id, name="", price=0.0)
+        raise HTTPException(status_code=404, detail="Human not found")
+    return HumanResponse(id=human_id, name="", price=0.0)
 
 
 @app.get("/")
